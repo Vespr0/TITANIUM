@@ -1,0 +1,30 @@
+[package]
+name = "vespro/titanium"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+signal = "sleitnick/signal@^1"
+fusion = "elttob/fusion@0.3.0" # WARNING: Don't switch to 0.4 until the code supports it.
+trove = "cody-nelson/trove@0.0.1"
+
+# Dev
+conch = "alicesaidhi/conch@0.2.3"
+conch_ui = "alicesaidhi/conch-ui@0.2.3"
+
+# Melee
+shapecasthitbox = "teamswordphin/shapecasthitbox@0.1.7"
+
+# Network
+BridgeNet2 = "ffrostflame/bridgenet2@^0.5"
+
+# Voxel destruction
+greedymeshing = "royal0959/rblx-nonvoxel-greedy-meshing@1.0.3"
+partcache = "andremhpra/partcache@1.0.0"
+
+# Spring
+spring = "nightcycle/spring@1.0.0"
+
+# Datastore
+suphisdatastoremodule = "skylord-103/suphisdatastoremodule@1.0.0"
