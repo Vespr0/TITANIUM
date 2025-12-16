@@ -1,11 +1,6 @@
 {
-  "name": "Titanium",
+  "name": "titanium",
   "tree": {
-    "$className": "DataModel",
-    "ReplicatedStorage": {
-      "titanium": {
-        "$path": "src"
-      }
-    }
+    "$path": "src"
   }
 }
