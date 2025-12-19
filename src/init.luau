@@ -45,27 +45,34 @@ end
 	Loads the module if it hasn't been loaded yet (Lazy Loading).
 ]]
 function Titanium.GetService(moduleName: string): any
+	-- Check if titanium was started
+	if not allowedServices then
+		warn(`Titanium: Engine was never started. Please call Titanium.Start() before getting a service.`)
+		return nil
+	end
+	
 	-- Check allowed services
 	if allowedServices and not allowedServices[moduleName] then
 		warn(`Titanium: Service "{moduleName}" was not requested in Start options.`)
+		return nil
 	end
 
-	-- 1. Check if already loaded
+	-- Check if already loaded
 	if loadedModules[moduleName] then
 		return loadedModules[moduleName]
 	end
 
-	-- 2. Check if it exists in the map
+	-- Check if it exists in the map
 	local targetModule = moduleMap[moduleName]
 	if not targetModule then
-		warn(`Titanium: Could not find module "{moduleName}"`)
+		warn(`Titanium: Could not find service "{moduleName}"`)
 		return nil
 	end
 
-	-- 3. Require and cache
+	-- Require and cache
 	local success, result = pcall(require, targetModule)
 	if not success then
-		warn(`Titanium: Failed to require module "{moduleName}": {result}`)
+		warn(`Titanium: Failed to require service "{moduleName}": {result}`)
 		return nil
 	end
 
