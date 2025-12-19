@@ -79,4 +79,37 @@ function Titanium.Start(folder: Folder?, blacklist: { ModuleScript }?)
 	end
 end
 
+
+-- Example
+function Titanium.Test()
+	local Broom = require(script.Shared.Util.Broom)
+	local Spring = require(script.Shared.Util.Spring)
+
+	local broom = Broom.new() 
+
+	-- Connecting an event
+	broom:Connect(game:GetService("Players").PlayerAdded, function(player)
+		print(player.Name)
+	end)
+
+	-- Adding an object
+	local brick = Instance.new("Part")
+	broom:Add(brick)
+
+	-- Adding a function
+	broom:Add(function()
+		print("Hello World")
+	end)
+
+	-- Cleaning up
+	broom:Clean()
+
+
+	-- Spring
+	local spring = Spring.new(0)
+	spring:SetTarget(1)
+	
+	print(spring:Update(0.1))
+end
+
 return Titanium

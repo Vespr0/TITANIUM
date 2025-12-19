@@ -4,7 +4,6 @@ local Assets = {}
 -- Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
 
 -- Types
 export type AssetsGetMode = "Clone" | "Require" | nil
@@ -15,7 +14,7 @@ local assetsFolder: Folder? = nil
 local rawAssets: { [string]: { Instance } } = {}
 
 -- Constants
-local ASSETS_NAME = "Assets"
+local ASSETS_FOLDER_NAME = "Assets"
 local WAIT_TIMEOUT = 3
 
 --[[
@@ -29,15 +28,13 @@ function Assets.Init()
 	end
 
 	if RunService:IsServer() then
-		-- On Server, we expect Assets in Workspace and move them to ReplicatedStorage
-		local workspaceAssets = Workspace:WaitForChild(ASSETS_NAME, WAIT_TIMEOUT)
+		-- On Server, we expect Assets in workspace and move them to ReplicatedStorage
+		local workspaceAssets = workspace:WaitForChild(ASSETS_FOLDER_NAME, WAIT_TIMEOUT)
 
 		if not workspaceAssets then
-			warn("❌ No assets folder found in Workspace (Assets)")
-			-- Create one to prevent blocking? Or error? Error seems safer for a framework.
-			-- But maybe just warn and create empty.
+			warn(`No "Assets" folder found in workspace. Creating empty folder.`)
 			workspaceAssets = Instance.new("Folder")
-			workspaceAssets.Name = ASSETS_NAME
+			workspaceAssets.Name = ASSETS_FOLDER_NAME
 			workspaceAssets.Parent = ReplicatedStorage -- Actually parent to RS directly
 		else
 			workspaceAssets.Parent = ReplicatedStorage
@@ -50,7 +47,7 @@ function Assets.Init()
 		end
 	else
 		-- On Client, wait for Assets in ReplicatedStorage
-		local rsAssets = ReplicatedStorage:WaitForChild(ASSETS_NAME, 10)
+		local rsAssets = ReplicatedStorage:WaitForChild(ASSETS_FOLDER_NAME, 10)
 		if not rsAssets then
 			error("❌ Assets timed out waiting for Assets in ReplicatedStorage")
 		end
@@ -67,7 +64,7 @@ function Assets.Init()
 		end
 	end
 
-	-- Optional: Validators logic could go here if needed, but omitted as per scope focus on checks.
+
 
 	isInitialized = true
 	print(`✅ Assets Initialized ({RunService:IsServer() and "Server" or "Client"})`)
