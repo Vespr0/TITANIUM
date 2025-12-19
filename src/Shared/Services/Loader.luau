@@ -92,18 +92,26 @@ function Loading.Start(folder: Folder, blacklist: { ModuleScript }?)
 			end
 		end
 
-		if required.Init then
-			-- Initialize the module.
-			local initSuccess, initError = pcall(required.Init)
-			if initSuccess then
-				Loading.Initialized[module.Name] = true
-				print(`✅ Initialized "{module.Name}" module`)
+		local function initialize()
+			if required.Init then
+				-- Initialize the module.
+				local initSuccess, initError = pcall(required.Init)
+				if initSuccess then
+					Loading.Initialized[module.Name] = true
+					print(`✅ Initialized "{module.Name}" module`)
+				else
+					warn(`❌ Failed to initialize "{module.Name}": {initError}`)
+				end
 			else
-				warn(`❌ Failed to initialize "{module.Name}": {initError}`)
+				-- If no Init, consider it initialized (or just loaded)
+				Loading.Initialized[module.Name] = true
 			end
+		end
+
+		if required.RunInParallel then
+			task.spawn(initialize)
 		else
-			-- If no Init, consider it initialized (or just loaded)
-			Loading.Initialized[module.Name] = true
+			initialize()
 		end
 
 		i += 1
