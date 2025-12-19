@@ -6,7 +6,7 @@ local Engine = {}
 local RunService = game:GetService("RunService")
 
 -- Modules
-local Loader = require(script.Parent.Util.Loader)
+local Loader = require(script.Parent.Services.Loader)
 local Assets = require(script.Parent.Assets)
 
 -- State

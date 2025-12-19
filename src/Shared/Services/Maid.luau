@@ -1,30 +1,30 @@
 --!strict
 local RunService = game:GetService("RunService")
 
-local Broom = {}
-Broom.__index = Broom
+local Maid = {}
+Maid.__index = Maid
 
 export type CleanupTask = Instance | RBXScriptConnection | { Destroy: (self: any) -> () } | (() -> ())
 
-export type Broom = {
+export type Maid = {
 	_tasks: { [any]: any },
-	Add: <T>(self: Broom, task: T, cleanupMethod: string?) -> T,
-	Remove: (self: Broom, task: any) -> (),
-	Clean: (self: Broom) -> (),
-	Destroy: (self: Broom) -> (),
-	Connect: (self: Broom, signal: any, fn: (...any) -> ()) -> RBXScriptConnection,
-	BindToRenderStep: (self: Broom, name: string, priority: number, fn: (dt: number) -> ()) -> (),
-	AttachToInstance: (self: Broom, instance: Instance) -> (),
-	Construct: <T, A...>(self: Broom, class: { new: (A...) -> T }, A...) -> T,
+	Add: <T>(self: Maid, task: T, cleanupMethod: string?) -> T,
+	Remove: (self: Maid, task: any) -> (),
+	Clean: (self: Maid) -> (),
+	Destroy: (self: Maid) -> (),
+	Connect: (self: Maid, signal: any, fn: (...any) -> ()) -> RBXScriptConnection,
+	BindToRenderStep: (self: Maid, name: string, priority: number, fn: (dt: number) -> ()) -> (),
+	AttachToInstance: (self: Maid, instance: Instance) -> (),
+	Construct: <T, A...>(self: Maid, class: { new: (A...) -> T }, A...) -> T,
 }
 
-function Broom.new(): Broom
+function Maid.new(): Maid
 	return setmetatable({
 		_tasks = {},
-	}, Broom) :: any
+	}, Maid) :: any
 end
 
-function Broom:Add<T>(task: T, method: string?): T
+function Maid:Add<T>(task: T, method: string?): T
 	if task == nil then
 		error("Task cannot be nil", 2)
 	end
@@ -67,7 +67,7 @@ function Broom:Add<T>(task: T, method: string?): T
 	return task
 end
 
-function Broom:Remove(task: any)
+function Maid:Remove(task: any)
 	local cleanup = self._tasks[task]
 	if cleanup then
 		cleanup()
@@ -75,41 +75,41 @@ function Broom:Remove(task: any)
 	end
 end
 
-function Broom:Clean()
+function Maid:Clean()
 	for task, cleanup in pairs(self._tasks) do
 		cleanup()
 	end
 	table.clear(self._tasks)
 end
 
-function Broom:Destroy()
+function Maid:Destroy()
 	self:Clean()
 	-- setmetatable(self :: any, nil) -- Optional: prevent use after destroy
 end
 
-function Broom:Connect(signal: any, fn: (...any) -> ())
+function Maid:Connect(signal: any, fn: (...any) -> ())
 	local connection = signal:Connect(fn)
 	self:Add(connection)
 	return connection
 end
 
-function Broom:BindToRenderStep(name: string, priority: number, fn: (dt: number) -> ())
+function Maid:BindToRenderStep(name: string, priority: number, fn: (dt: number) -> ())
 	RunService:BindToRenderStep(name, priority, fn)
 	self:Add(function()
 		RunService:UnbindFromRenderStep(name)
 	end)
 end
 
-function Broom:AttachToInstance(instance: Instance)
+function Maid:AttachToInstance(instance: Instance)
 	self:Add(instance.Destroying:Connect(function()
 		self:Destroy()
 	end))
 end
 
-function Broom:Construct(class, ...)
+function Maid:Construct(class, ...)
 	local object = class.new(...)
 	return self:Add(object)
 end
 
-return Broom
+return Maid
  

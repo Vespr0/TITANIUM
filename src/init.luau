@@ -7,6 +7,7 @@ type ModuleMap = { [string]: ModuleScript }
 -- State
 local loadedModules: { [string]: any } = {}
 local moduleMap: ModuleMap = {}
+local allowedServices: { [string]: boolean }? = nil
 
 --// Module Mapping Logic
 local function mapModules(folder: Instance)
@@ -23,12 +24,18 @@ local function mapModules(folder: Instance)
 	end
 end
 
--- Initialize mapping from Shared, Client, and Server folders
--- We only map Shared by default to ensure client/server agnostic API unless requested otherwise.
--- However, typically a framework exposes its Shared tools.
+-- Map services
 local Shared = script:WaitForChild("Shared", 5)
 if Shared then
-	mapModules(Shared)
+	local Services = Shared:FindFirstChild("Services")
+	if Services then
+		mapModules(Services)
+	end
+	-- Also map Engine.
+	local Engine = Shared:FindFirstChild("Engine")
+	if Engine and Engine:IsA("ModuleScript") then
+		moduleMap["Engine"] = Engine
+	end
 end
 
 --// Public API
@@ -37,7 +44,12 @@ end
 	Retrieves a framework module by name.
 	Loads the module if it hasn't been loaded yet (Lazy Loading).
 ]]
-function Titanium.Get(moduleName: string): any
+function Titanium.GetService(moduleName: string): any
+	-- Check allowed services
+	if allowedServices and not allowedServices[moduleName] then
+		warn(`Titanium: Service "{moduleName}" was not requested in Start options.`)
+	end
+
 	-- 1. Check if already loaded
 	if loadedModules[moduleName] then
 		return loadedModules[moduleName]
@@ -61,16 +73,26 @@ function Titanium.Get(moduleName: string): any
 	return result
 end
 
--- Alias for Get
-Titanium.GetService = Titanium.Get
+-- Alias for GetService
+Titanium.Get = Titanium.GetService
 
 --[[
 	Starts the Titanium Framework.
 	This initializes the TitaniumEngine and Asset system.
 	@param folder Optional folder containing Game Modules to load via TitaniumEngine.
+	@param services Optional list of services to whitelist.
 	@param blacklist Optional blacklist of modules to ignore.
 ]]
-function Titanium.Start(folder: Folder?, blacklist: { ModuleScript }?)
+function Titanium.Start(folder: Folder?, services: { string }?, blacklist: { ModuleScript }?)
+	if services then
+		allowedServices = {
+			["Engine"] = true
+		}
+		for _, serviceName in services do
+			allowedServices[serviceName] = true
+		end
+	end
+
 	local Engine = Titanium.Get("Engine")
 	if Engine then
 		Engine.Start(folder, blacklist)
@@ -79,30 +101,29 @@ function Titanium.Start(folder: Folder?, blacklist: { ModuleScript }?)
 	end
 end
 
-
--- Example
+-- Test
 function Titanium.Test()
-	local Broom = require(script.Shared.Util.Broom)
-	local Spring = require(script.Shared.Util.Spring)
+	local Maid = Titanium.Get("Maid")
+	local Spring = Titanium.Get("Spring")
 
-	local broom = Broom.new() 
+	local Maid = Maid.new() 
 
 	-- Connecting an event
-	broom:Connect(game:GetService("Players").PlayerAdded, function(player)
+	Maid:Connect(game:GetService("Players").PlayerAdded, function(player)
 		print(player.Name)
 	end)
 
 	-- Adding an object
 	local brick = Instance.new("Part")
-	broom:Add(brick)
+	Maid:Add(brick)
 
 	-- Adding a function
-	broom:Add(function()
+	Maid:Add(function()
 		print("Hello World")
 	end)
 
 	-- Cleaning up
-	broom:Clean()
+	Maid:Clean()
 
 
 	-- Spring
@@ -110,6 +131,10 @@ function Titanium.Test()
 	spring:SetTarget(1)
 	
 	print(spring:Update(0.1))
+
+	-- Entities
+	local Entities = Titanium.Get("Entities")
+	
 end
 
 return Titanium
