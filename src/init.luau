@@ -8,6 +8,7 @@ type ModuleMap = { [string]: ModuleScript }
 local loadedModules: { [string]: any } = {}
 local moduleMap: ModuleMap = {}
 local allowedServices: { [string]: boolean }? = nil
+local isStarted = false
 
 --// Module Mapping Logic
 local function mapModules(folder: Instance)
@@ -46,7 +47,7 @@ end
 ]]
 function Titanium.GetService(moduleName: string): any
 	-- Check if titanium was started
-	if not allowedServices then
+	if not isStarted then
 		warn(`Titanium: Engine was never started. Please call Titanium.Start() before getting a service.`)
 		return nil
 	end
@@ -91,6 +92,8 @@ Titanium.Get = Titanium.GetService
 	@param blacklist Optional blacklist of modules to ignore.
 ]]
 function Titanium.Start(folder: Folder?, services: { string }?, blacklist: { ModuleScript }?)
+	isStarted = true
+	
 	if services then
 		allowedServices = {
 			["Engine"] = true
@@ -113,24 +116,24 @@ function Titanium.Test()
 	local Maid = Titanium.Get("Maid")
 	local Spring = Titanium.Get("Spring")
 
-	local Maid = Maid.new() 
+	local maid = Maid.new() 
 
 	-- Connecting an event
-	Maid:Connect(game:GetService("Players").PlayerAdded, function(player)
+	maid:Connect(game:GetService("Players").PlayerAdded, function(player)
 		print(player.Name)
 	end)
 
 	-- Adding an object
 	local brick = Instance.new("Part")
-	Maid:Add(brick)
+	maid:Add(brick)
 
 	-- Adding a function
-	Maid:Add(function()
+	maid:Add(function()
 		print("Hello World")
 	end)
 
 	-- Cleaning up
-	Maid:Clean()
+	maid:Clean()
 
 
 	-- Spring
@@ -140,8 +143,7 @@ function Titanium.Test()
 	print(spring:Update(0.1))
 
 	-- Entities
-	local Entities = Titanium.Get("Entities")
-	
+	local _Entities = Titanium.Get("Entities")
 end
 
 return Titanium

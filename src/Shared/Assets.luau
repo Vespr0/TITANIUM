@@ -2,8 +2,8 @@
 local Assets = {}
 
 Assets.Mode = {
-	Clone = "Clone",
-	Require = "Require",
+	CLONE = "Clone",
+	REQUIRE = "Require",
 }
 
 -- Services
@@ -11,7 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 -- Types
-export type AssetsGetMode = typeof(Assets.Mode.Clone) | typeof(Assets.Mode.Require) | nil
+export type AssetsGetMode = typeof(Assets.Mode.CLONE) | typeof(Assets.Mode.REQUIRE) | nil
 
 -- Private State
 local isInitialized = false
@@ -115,9 +115,9 @@ function Assets.GetDir(category: string, path: string, mode: AssetsGetMode): any
 		return nil
 	end
 
-	if mode == Assets.Mode.Clone then
+	if mode == Assets.Mode.CLONE then
 		return current:Clone()
-	elseif mode == Assets.Mode.Require and current:IsA("ModuleScript") then
+	elseif mode == Assets.Mode.REQUIRE and current:IsA("ModuleScript") then
 		return require(current :: ModuleScript)
 	end
 
@@ -141,9 +141,9 @@ function Assets.Get(category: string, name: string, mode: AssetsGetMode): any
 
 	for _, asset in assetsList do
 		if asset.Name == name then
-			if mode == Assets.Mode.Clone then
+			if mode == Assets.Mode.CLONE then
 				return asset:Clone()
-			elseif mode == Assets.Mode.Require and asset:IsA("ModuleScript") then
+			elseif mode == Assets.Mode.REQUIRE and asset:IsA("ModuleScript") then
 				return require(asset :: ModuleScript)
 			end
 			return asset
